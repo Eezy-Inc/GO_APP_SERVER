@@ -12,4 +12,4 @@ end
 s.close
 endtime = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 elapsed = endtime - starttime
-puts "Elapsed: #{elapsed}"
+# puts "Elapsed: #{elapsed}"

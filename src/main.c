@@ -1,93 +1,129 @@
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <netdb.h>
-#include <stdio.h>
+#include <stdbool.h>
+#include <limits.h>
+#include <pthread.h>
 
 
-#define SERVER_PORT	80
-#define MAXLINE		4096
-#define SA struct sockaddr
+#define SERVERPORT			4221
+#define BUFSIZE				4096
+#define SOCKETERROR			(-1)
+#define SERVER_BACKLOG		1
+#define THREAD_POOL_SIZE	20
 
-void err_n_die(const char *fmt, ...);
+pthread_t th_pool[THREAD_POOL_SIZE];
+
+typedef struct sockaddr_in	SA_IN;
+typedef struct sockaddr		SA;
+
+void * handle_connection(void *client_socket);
+int check(int exp, const char *msg);
+void * thread_func(void * arg);
 
 
-int main(int argc, char **argv)
+int main()
 {
-	int		sockfd;
-	int		n;
-	int		sendbytes;
-	struct	sockaddr_in servaddr;
-	char	sendline[MAXLINE];
-	char	recvline[MAXLINE];
+	int server_socket;
+	int client_socket;
+	int addr_size;
 
-	if (argc != 2)
-		err_n_die("usage: %s <server address>", argv[0]);
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-		err_n_die("Error while creating the socket!");
+	SA_IN server_addr, client_addr;
 
-	bzero(&servaddr, sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
-	servaddr.sin_port	= htons(SERVER_PORT);
+	for (int i = 0; i < THREAD_POOL_SIZE; i++)
+		pthread_create(&th_pool[], NULL
 
-	if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)
-		err_n_die("inet_pton error for %s ", argv[1]);
+	check((server_socket = socket(AF_INET, SOCK_STREAM, 0)), "Failed to create socket");
 
-	if (connect(sockfd, (SA *) &servaddr, sizeof(servaddr)) < 0)
-		err_n_die("connect failed!");
+	//init addr struct
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = INADDR_ANY;
+	server_addr.sin_port = htons(SERVERPORT);
 
-	//We are connected, make a message:
+	check(bind(server_socket,(SA*)&server_addr, sizeof(server_addr)), "Bind Failed!");
+	check(listen(server_socket, SERVER_BACKLOG), "Listen Failed!");
 
-	sprintf(sendline, "GET / HTTP/1.1\r\n\r\n");
-	sendbytes = strlen(sendline);
-
-	// Send req
-
-	if (write(sockfd, sendline, sendbytes) != sendbytes)
-		err_n_die("write error");
-
-
-	// read response
-	while ((n = read(sockfd, recvline, MAXLINE - 1)) > 0)
+	while (true) 
 	{
-		printf("%s", recvline);
-		memset(recvline, 0, MAXLINE);
-	}
+		printf("Waiting for connections...\n");
 
-	if (n < 0)
-		err_n_die("read error");
+		addr_size = sizeof(SA_IN);
+		check(client_socket = accept(server_socket, (SA*)&client_addr, (socklen_t*)&addr_size), "accept failed");
+		printf("Connected!\n");
 
-	exit (0);
+		
+
+	// 	pthread_t t;
+	// 	int *pclient = malloc(sizeof(int));
+	// 	*pclient = client_socket;
+	// 	pthread_create(&t, NULL, handle_connection, pclient);
+	// }
+	close(server_socket);
+	return (0);
 }
 
-void err_n_die(const char *fmt, ...)
+int check(int exp, const char *msg) 
 {
-	int		errno_save;
-	va_list	ap;
+	if(exp == SOCKETERROR)
+	{
+		perror(msg);
+		exit(1);
+	}
+	return exp;
+}
 
-	errno_save = errno;
+void * handle_connection(void* p_client_socket)
+{
+	int		client_socket = *((int*)p_client_socket);
+	free(p_client_socket);
+	char	buffer[BUFSIZE];
+	size_t	bytes_read;
+	int		msg_size = 0;
+	char	actual_path[PATH_MAX + 1];
 
-	va_start(ap, fmt);
-	vfprintf(stdout, fmt, ap);
-	fprintf(stdout, "\n");
+	// read client's message 
+	while((bytes_read = read(client_socket, buffer + msg_size, sizeof(buffer) - msg_size - 1)) > 0)
+	{
+		msg_size += bytes_read;
+		if (msg_size > BUFSIZE - 1 || buffer[msg_size -1] == '\n')
+			break;
+	}
+
+	check(bytes_read, "recv error");
+	buffer[msg_size - 1] = 0; 
+
+	printf("REQUEST: %s\n", buffer);
 	fflush(stdout);
 
-	if (errno_save != 0)
+	// validity check
+	if (realpath(buffer, actual_path) == NULL)
 	{
-		fprintf(stdout, "(errno = %d) : %s\n", errno_save, strerror(errno_save));
-		fprintf(stdout, "\n");
-		fflush(stdout);
+		printf("ERROR(bad path): %s\n", buffer);
+		close(client_socket);
+		return (NULL);
 	}
-	va_end(ap);
 
-	exit(1);
+	FILE *fp = fopen(actual_path, "r");
+	if (fp == NULL)
+	{
+		printf("ERROR(open): %s\n", buffer);
+		close(client_socket);
+		return (NULL);
+	}
+	// SLEEP -- testing only
+	sleep(1);
+
+	while ((bytes_read = fread(buffer, 1, BUFSIZE, fp)) > 0)
+	{
+		printf("sending %zu bytes\n", bytes_read);
+	}
+	close(client_socket);
+	fclose(fp);
+	printf("Closing connection\n");
+	return (NULL);
 }
+
+void * thread_func(void * arg);
