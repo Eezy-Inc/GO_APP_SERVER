@@ -15,9 +15,7 @@
 
 
 #define SERVER_PORT	80
-
 #define MAXLINE		4096
-
 #define SA struct sockaddr
 
 void err_n_die(const char *fmt, ...);
