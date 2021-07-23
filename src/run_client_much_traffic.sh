@@ -2,5 +2,6 @@
 
 for N in {1..1000}
 do 
-    ruby client.rb main
+    ruby client.rb $((($N % 5) + 1)) & 
 done
+wait
