@@ -1,8 +1,8 @@
 NAME := server
 
 CC := clang
-CFLAGS := -Wall -Wextra -Werror -fsanitize=address -fsanitize=leak -fsanitize=signed-integer-overflow -c
-LFLAGS := -Wall -Werror -Wextra -fsanitize=address -fsanitize=leak -fsanitize=signed-integer-overflow -o
+CFLAGS := -Wall -Wextra -Werror  -c
+LFLAGS := -Wall -Werror -Wextra  -o
 SRC_DIR := ./src/
 OBJ_DIR := ./obj/
 
