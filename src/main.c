@@ -36,7 +36,7 @@ int main()
 		enqueue(pclient);
 		pthread_mutex_unlock(&mutex);
 	}
-	// close(server_socket);
+	close(server_socket);
 	return (0);
 }
 
@@ -104,7 +104,7 @@ void * handle_connection(void* p_client_socket)
 		return (NULL);
 	}
 	// SLEEP -- testing only
-	// sleep(1);
+	sleep(1);
 
 	while ((bytes_read = fread(buffer, 1, BUFSIZE, fp)) > 0)
 	{
