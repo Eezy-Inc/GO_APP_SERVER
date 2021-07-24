@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <pthread.h>
-#include "queue.h"
+#include "../includes/queue.h"
 
 #define SERVERPORT			4221
 #define BUFSIZE				4096
@@ -34,7 +34,7 @@ int main()
 	SA_IN server_addr, client_addr;
 
 	for (int i = 0; i < THREAD_POOL_SIZE; i++)
-		pthread_create(&th_pool[], NULL
+		pthread_create(&th_pool[i], NULL, thread_func, NULL);
 
 	check((server_socket = socket(AF_INET, SOCK_STREAM, 0)), "Failed to create socket");
 
@@ -78,9 +78,13 @@ int check(int exp, const char *msg)
 
 void * thread_func(void *arg)
 {
+	(void)arg;
 	while (true)
 	{
-		
+		int *pclient = dequeue();
+		if (pclient != NULL)
+			// there is a connection
+			handle_connection(pclient);
 	}
 }
 

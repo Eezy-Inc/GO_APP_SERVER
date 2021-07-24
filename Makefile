@@ -1,10 +1,38 @@
+NAME := server
+
 CC=clang
-CFLAGS=-g
+CFLAGS=-g -Wall -Wextra -Werror -ggdb3 -fsanitize=address -fsanitize=leak -fsanitize=signed-integer-overflow
+SRC_DIR := ./src/
+OBJ_DIR := ./obj/
 
-all: socket
+SRC_FILES := main.c \
+			 queue.c
 
-socket: src/main.c
-	$(CC) $(CFLAGS) -o socket src/main.c
+HEADER := -I includes/
+
+OBJ_FILES = $(SRC_FILES:.c=.o)
+OBJS = $(addprefix $(OBJ_DIR), $(OBJ_FILES))
+SRCS = $(addprefix $(SRC_DIR), $(SRC_FILES))
+
+RM := rm -f
+
+all: obj $(NAME)
+
+obj: $(SRCS)
+	@mkdir -p $(OBJ_DIR)
+
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+	$(CC) $(CFLAGS) $< -o $@ $(HEADER)
+
+$(NAME): $(OBJS)
+	$(CC) $(LFLAGS) $(NAME) $(OBJS) $(HEADER)
 
 clean:
-	rm -rf *.dSYM socket
+	$(RM) $(OBJS)
+
+fclean: clean
+	/bin/rm -f $(NAME)
+
+re: fclean all
+
+.PHONY: all obj clean fclean re
