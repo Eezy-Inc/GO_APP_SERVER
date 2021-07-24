@@ -11,4 +11,4 @@ Run `./server` to launch server
 ## Testing 
 In the `utils` directory run `./run_client_much_traffic.sh` for multiple connections
 
-Change the value in `for N in {1..`**1000**`}` to specify number of connections
+Change the value from **1000** in `for N in {1..1000}` to specify number of connections
