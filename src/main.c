@@ -37,7 +37,7 @@ int main()
 		pthread_cond_signal(&condition_var);
 		pthread_mutex_unlock(&mutex);
 	}
-	// close(server_socket);
+	close(server_socket);
 	return (0);
 }
 
@@ -54,11 +54,15 @@ int check(int exp, const char *msg)
 void * thread_func(void *arg)
 {
 	(void)arg;
+	int *pclient;
 	while (true)
 	{
 		pthread_mutex_lock(&mutex);
-		pthread_cond_wait(&condition_var, &mutex);
-		int *pclient = dequeue();
+		if ((pclient = dequeue()) == NULL)
+		{
+			pthread_cond_wait(&condition_var, &mutex);
+			pclient = dequeue();
+		}
 		pthread_mutex_unlock(&mutex);
 		if (pclient != NULL)
 			// there is a connection
@@ -113,6 +117,7 @@ void * handle_connection(void* p_client_socket)
 		printf("sending %zu bytes\n", bytes_read);
 	}
 	close(client_socket);
+	close(server_socket);
 	fclose(fp);
 	printf("Closing connection\n");
 	return (NULL);
