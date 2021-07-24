@@ -58,7 +58,7 @@ int main()
 		*pclient = client_socket;
 		enqueue(pclient);
 	}
-	close(server_socket);
+	// close(server_socket);
 	return (0);
 }
 
@@ -136,4 +136,3 @@ void * handle_connection(void* p_client_socket)
 	return (NULL);
 }
 
-void * thread_func(void * arg);
