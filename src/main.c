@@ -37,7 +37,7 @@ int main()
 		pthread_cond_signal(&condition_var);
 		pthread_mutex_unlock(&mutex);
 	}
-	close(server_socket);
+	// close(server_socket);
 	return (0);
 }
 
