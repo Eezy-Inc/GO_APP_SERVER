@@ -47,17 +47,17 @@ int main()
 
 	while (true) 
 	{
-		printf("Waiting for connections...\n");
+		// printf("Waiting for connections...\n");
 
 		addr_size = sizeof(SA_IN);
 		check(client_socket = accept(server_socket, (SA*)&client_addr, (socklen_t*)&addr_size), "accept failed");
-		printf("Connected!\n");
+		// printf("Connected!\n");
 
 		int *pclient = malloc(sizeof(int));
 		*pclient = client_socket;
 		enqueue(pclient);
 	}
-	// close(server_socket);
+	close(server_socket);
 	return (0);
 }
 
