@@ -54,13 +54,9 @@ int main()
 		check(client_socket = accept(server_socket, (SA*)&client_addr, (socklen_t*)&addr_size), "accept failed");
 		printf("Connected!\n");
 
-		
-
-	// 	pthread_t t;
 		int *pclient = malloc(sizeof(int));
 		*pclient = client_socket;
 		enqueue(pclient);
-	// 	pthread_create(&t, NULL, handle_connection, pclient);
 	}
 	close(server_socket);
 	return (0);
