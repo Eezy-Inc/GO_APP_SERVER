@@ -16,7 +16,7 @@
 #define BUFSIZE				4096
 #define SOCKETERROR			(-1)
 #define SERVER_BACKLOG		1
-#define THREAD_POOL_SIZE	100
+#define THREAD_POOL_SIZE	32
 
 pthread_t       th_pool[THREAD_POOL_SIZE];
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
