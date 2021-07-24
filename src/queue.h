@@ -7,5 +7,7 @@ struct node {
 };
 typedef struct node node_t;
 
+void enqueue(int *client_socket);
+int *dequeue();
 
 #endif

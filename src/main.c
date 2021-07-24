@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <pthread.h>
-
+#include "queue.h"
 
 #define SERVERPORT			4221
 #define BUFSIZE				4096
@@ -57,10 +57,11 @@ int main()
 		
 
 	// 	pthread_t t;
-	// 	int *pclient = malloc(sizeof(int));
-	// 	*pclient = client_socket;
+		int *pclient = malloc(sizeof(int));
+		*pclient = client_socket;
+		enqueue(pclient);
 	// 	pthread_create(&t, NULL, handle_connection, pclient);
-	// }
+	}
 	close(server_socket);
 	return (0);
 }
@@ -74,6 +75,15 @@ int check(int exp, const char *msg)
 	}
 	return exp;
 }
+
+void * thread_func(void *arg)
+{
+	while (true)
+	{
+		
+	}
+}
+
 
 void * handle_connection(void* p_client_socket)
 {
