@@ -1,28 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <pthread.h>
-#include "../includes/queue.h"
-
-#define SERVERPORT			4221
-#define BUFSIZE				4096
-#define SOCKETERROR			(-1)
-#define SERVER_BACKLOG		1
-#define THREAD_POOL_SIZE	20
-
-pthread_t th_pool[THREAD_POOL_SIZE];
-
-typedef struct sockaddr_in	SA_IN;
-typedef struct sockaddr		SA;
-
-void	* handle_connection(void *client_socket);
-void 	* thread_func(void * arg);
-int		check(int exp, const char *msg);
+#include "../includes/lib.h"
 
 int main()
 {
@@ -32,6 +8,7 @@ int main()
 
 	SA_IN server_addr, client_addr;
 
+	// create threads
 	for (int i = 0; i < THREAD_POOL_SIZE; i++)
 		pthread_create(&th_pool[i], NULL, thread_func, NULL);
 
@@ -47,17 +24,19 @@ int main()
 
 	while (true) 
 	{
-		// printf("Waiting for connections...\n");
+		printf("Waiting for connections...\n");
 
 		addr_size = sizeof(SA_IN);
 		check(client_socket = accept(server_socket, (SA*)&client_addr, (socklen_t*)&addr_size), "accept failed");
-		// printf("Connected!\n");
+		printf("Connected!\n");
 
 		int *pclient = malloc(sizeof(int));
 		*pclient = client_socket;
+		pthread_mutex_lock(&mutex);
 		enqueue(pclient);
+		pthread_mutex_unlock(&mutex);
 	}
-	close(server_socket);
+	// close(server_socket);
 	return (0);
 }
 
@@ -76,7 +55,9 @@ void * thread_func(void *arg)
 	(void)arg;
 	while (true)
 	{
+		pthread_mutex_lock(&mutex);
 		int *pclient = dequeue();
+		pthread_mutex_unlock(&mutex);
 		if (pclient != NULL)
 			// there is a connection
 			handle_connection(pclient);
@@ -86,6 +67,7 @@ void * thread_func(void *arg)
 void * handle_connection(void* p_client_socket)
 {
 	int		client_socket = *((int*)p_client_socket);
+
 	free(p_client_socket);
 	char	buffer[BUFSIZE];
 	size_t	bytes_read;
@@ -122,7 +104,7 @@ void * handle_connection(void* p_client_socket)
 		return (NULL);
 	}
 	// SLEEP -- testing only
-	sleep(1);
+	// sleep(1);
 
 	while ((bytes_read = fread(buffer, 1, BUFSIZE, fp)) > 0)
 	{
