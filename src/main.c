@@ -20,10 +20,9 @@ pthread_t th_pool[THREAD_POOL_SIZE];
 typedef struct sockaddr_in	SA_IN;
 typedef struct sockaddr		SA;
 
-void * handle_connection(void *client_socket);
-int check(int exp, const char *msg);
-void * thread_func(void * arg);
-
+void	* handle_connection(void *client_socket);
+void 	* thread_func(void * arg);
+int		check(int exp, const char *msg);
 
 int main()
 {
@@ -83,7 +82,6 @@ void * thread_func(void *arg)
 			handle_connection(pclient);
 	}
 }
-
 
 void * handle_connection(void* p_client_socket)
 {

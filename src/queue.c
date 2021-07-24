@@ -10,13 +10,9 @@ void enqueue(int *client_socket)
    newnode -> client_socket = client_socket;
    newnode -> next = NULL;
    if (tail == NULL)
-   {
        head = newnode;
-   } 
    else
-   {
        tail -> next = newnode;
-   }
    tail = newnode; 
 }
 

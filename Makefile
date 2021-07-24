@@ -1,8 +1,8 @@
 NAME := server
 
 CC := clang
-CFLAGS := -Wall -Wextra -Werror  -c
-LFLAGS := -Wall -Werror -Wextra  -o
+CFLAGS := -pthread -Wall -Wextra -Werror  -c
+LFLAGS := -pthread -Wall -Werror -Wextra  -o
 SRC_DIR := ./src/
 OBJ_DIR := ./obj/
 
