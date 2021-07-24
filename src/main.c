@@ -117,7 +117,6 @@ void * handle_connection(void* p_client_socket)
 		printf("sending %zu bytes\n", bytes_read);
 	}
 	close(client_socket);
-	close(server_socket);
 	fclose(fp);
 	printf("Closing connection\n");
 	return (NULL);
