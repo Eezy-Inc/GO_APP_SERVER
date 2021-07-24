@@ -20,6 +20,7 @@
 
 pthread_t       th_pool[THREAD_POOL_SIZE];
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t  condition_var = PTHREAD_COND_INITIALIZER;
 
 typedef struct sockaddr_in	SA_IN;
 typedef struct sockaddr		SA;

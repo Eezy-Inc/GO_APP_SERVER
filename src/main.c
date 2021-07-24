@@ -34,6 +34,7 @@ int main()
 		*pclient = client_socket;
 		pthread_mutex_lock(&mutex);
 		enqueue(pclient);
+		pthread_cond_signal(&condition_var);
 		pthread_mutex_unlock(&mutex);
 	}
 	close(server_socket);
@@ -56,6 +57,7 @@ void * thread_func(void *arg)
 	while (true)
 	{
 		pthread_mutex_lock(&mutex);
+		pthread_cond_wait(&condition_var, &mutex);
 		int *pclient = dequeue();
 		pthread_mutex_unlock(&mutex);
 		if (pclient != NULL)
