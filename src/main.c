@@ -1,6 +1,6 @@
 #include "../includes/lib.h"
 
-int main()
+int main(void)
 {
 	int server_socket;
 	int client_socket;
